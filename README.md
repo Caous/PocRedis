@@ -37,112 +37,219 @@ Vamos pontuar apenas dois tópicos dos serviços que o Redis oferece, Pub/Sub e 
    
 <b>[Pub/Sub]</b> SUBSCRIBE, UNSUBSCRIBEe PUBLISH este é um padrão de projeto arquitetural para mensagens Publicar/Assinar onde remetentes não são programados para enviar suas mensagens para receptores específicos (assinantes). Em vez disso, as mensagens publicadas são caracterizadas em canais (Chanel), sem conhecimento de quais (se houver) assinantes podem existir. Os assinantes manifestam interesse em um ou mais canais e só recebem mensagens de seu interesse, sem saber quais (se houver) editores existem.      
    
-Legal né? Mas agora a pergunta é como posso usar o Command? Abaixo dou um exemplo de caso de uso.
+Legal né? Mas agora a pergunta é como posso usar o Redis? Abaixo dou um exemplo de caso de uso.
 
 </br></br>
 
 ### <h2>[Cenário de Uso]
-Vamos imaginar o seguinte cenário, você tem uma API Rest <b>que gerencia seu cliente</b>, desta forma, você precisa fazer várias alterações com seu cliente, como <b>alterar, cadastrar, excluir, listar, filtrar etc...</b> Então vamos colocar a mão na massa para esse código rodar
+Vamos imaginar o seguinte cenário, você tem uma API Rest <b>que gerencia seu cliente</b>, desta forma, você precisa fazer várias alterações com seu cliente, como <b>alterar, cadastrar, excluir, listar, filtrar etc...</b> Então vamos essa API precisa notificar outro sistema sempre que cadastrar um usuário novo, sendo assim oque você vai precisar fazer é sua API notificar o Canal que ela está inscrita e o aplicação do outro lado receber a notificação.
 
 ### <h2> Criação de Classes
 
-Vamos criar a classe de request que chegara por meio de um comando, configuramos também o seu retorno colocando a interface do MediatR IRequest, ela é responsável para o MediatR procurar suas classes equivalentes.
+Vamos criar a classe que será responsável por conectar ao canal e configurar o cache.
 ```C#
-public class CreateCustomerRequest : IRequest<CreateCustomerResponse>
+public interface ICachingService
 {
-    public string Name { get; set; } = string.Empty;
-    public string LastName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
+    Task SetAsync(string Key, string value);
+    Task<string> GetAsync(string Key);
 }
 ```
 
-Próxima etapa é criarmos o Handler no caso o nosso manipulador que será responsável por executar a criação do nosso usuário.
+Próxima etapa será implementar está interface
 ```C#
 
-public class CreateCustomerHandler : IRequestHandler<CreateCustomerRequest, CreateCustomerResponse>
+public class CachingService : ICachingService
 {
-    private readonly IRepository<Customer> _repository;
+    private readonly IDistributedCache _cache;
+    private readonly DistributedCacheEntryOptions _options;
 
-    public CreateCustomerHandler(IRepository<Customer> repository)
+    public CachingService(IDistributedCache cache)
     {
-        _repository = repository;
+        _cache = cache;
+        _options = new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromSeconds(120),
+            SlidingExpiration = TimeSpan.FromSeconds(120)
+        };
+    }
+    public async Task<string> GetAsync(string key)
+    {
+        return await _cache.GetStringAsync(key);
     }
 
-    public Task<CreateCustomerResponse> Handle(CreateCustomerRequest request, CancellationToken cancellationToken)
+    public async Task SetAsync(string key, string value)
     {
-        var customer = new Customer(Guid.Empty, request.Name, request.LastName, request.Email);
-
-        _repository.Save(customer);
-
-        return Task.Run(() => new CreateCustomerResponse
-        {
-            Id = customer.Id,
-            Name = customer.Name,
-            Email = customer.Email,
-            DateRegister = customer.DateRegister
-        });
+        await _cache.SetStringAsync(key, value, _options);
     }
 }
+
 ```
 </br>
 
-Por ultimo criamos nossa Controller com o método de criar usuário
+Vamos também aproveitar e criar nossa classe que irá fazer o Publish no canal
 ```C#
-[ApiController]
-    [Route("customers")]
-    public class CustomerController : Controller
-    {
-        private readonly IMediator _mediator;
+using StackExchange.Redis;
 
-        public CustomerController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-        
-        [HttpPost]
-        public IActionResult Post([FromBody] CreateCustomerRequest command)
-        {
-            var response = _mediator.Send(command);
-            return Ok(response);
-        }
-     }
-```
-
-Não podemos esquecer de configurar nosso Program.Cs para reconhecer e injetar o MediatR em nossa aplicação
-
-```C#
-var builder = WebApplication.CreateBuilder(args);
-
-// Add services to the container.
-
-builder.Services.AddControllers();
-builder.Services.AddScoped<IRepository<Customer>,CustomerRepository>();
-builder.Services.AddMediatR(cfg => cfg.RegisterServicesFromAssemblies(Assembly.GetExecutingAssembly()));
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-
-var app = builder.Build();
-
-// Configure the HTTP request pipeline.
-if (app.Environment.IsDevelopment())
+namespace PocWebCacheRedis.Infrastructure.Publish;
+public class PublishCustomer
 {
-    app.UseSwagger();
-    app.UseSwaggerUI();
+    private readonly IConfiguration _configuration;
+    private static ConnectionMultiplexer _connection;
+    public PublishCustomer(IConfiguration configuration)
+    {
+        _configuration = configuration;
+        _connection = ConnectionMultiplexer.Connect(configuration["Redis:ConnectionString"] ?? string.Empty);
+    }
+
+    public async void PublishChannel(Customer customer) =>  await _connection.GetSubscriber().PublishAsync(_configuration["Redis:Chanel"] ?? string.Empty, $"Cliente cadastro com sucesso {customer.Name}", CommandFlags.HighPriority);
+
+}
+```
+   Também não podemos nos esquecer de configurar no arquivo service, que será chamado pela controller todo nosso serviço do redis
+   
+```C#
+
+ public class CustomerService
+ {
+    private readonly IRepository<Customer> _customerRepository;
+    private readonly IMapper _mapper;
+    private readonly ICachingService _cache;
+    private readonly IConfiguration _configuration;
+    private string _cacheKey = "customer_";
+
+    public CustomerService(IRepository<Customer> customerRepository, IMapper mapper, ICachingService cache, IConfiguration configuration)
+    {
+        _customerRepository = customerRepository;
+        _mapper = mapper;
+        _cache = cache;
+        _configuration = configuration;
+    }
+
+    public async Task<CustomerDto> RegisterCustomer(CustomerDto customer)
+    {
+        var customerSave = await _customerRepository.Save(_mapper.Map<Customer>(customer));
+        await _cache.SetAsync(_cacheKey + customerSave, JsonSerializer.Serialize(customer));
+        new PublishCustomer(_configuration).PublishChannel(_mapper.Map<Customer>(customer));
+        return customer;
+    }
+
+    public async Task<CustomerDto?> GetCustomerDto(CustomerDto customer)
+    {
+        var customerCache = await _cache.GetAsync(_cacheKey + customer.Id);
+
+        if (customerCache != null)
+            return JsonSerializer.Deserialize<CustomerDto>(customerCache);
+        else
+        {
+            var result = await _customerRepository.Get(customer.Id);
+            if (result != null)
+            {
+                await _cache.SetAsync(_cacheKey + result.Id, JsonSerializer.Serialize(customer));
+                return _mapper.Map<CustomerDto>(result);
+            }
+        }
+        return null;
+    }
+
+    public async Task<List<CustomerDto>?> GetAllCustomers()
+    {
+        var customerCache = await _cache.GetAsync(_cacheKey + "all");
+
+        if (customerCache != null)
+            return JsonSerializer.Deserialize<List<CustomerDto>>(customerCache);
+
+        var result = await _customerRepository.GetAll();
+
+        if (result != null)
+        {
+            await _cache.SetAsync(_cacheKey + "all", JsonSerializer.Serialize(result));
+            return _mapper.Map<List<CustomerDto>>(result.ToList());
+        }
+
+        return null;
+    }
+
+    public async Task EditCustomer(CustomerDto customer) => await _customerRepository.Edit(_mapper.Map<Customer>(customer));
+
+    public async Task DeleteCustomer(CustomerDto customer) => await _customerRepository.Delete(customer.Id);
+ }
+```
+   
+Agora vamos configurar nossa controller
+   
+````C#
+[Route("api/[controller]")]
+[ApiController]
+public class CustomerController : ControllerBase
+{
+    private CustomerService _customerService;
+
+    public CustomerController(IRepository<Customer> repositoryCustomer, IMapper mapper, ICachingService cache, IConfiguration configuration)
+    {
+        _customerService = new CustomerService(repositoryCustomer, mapper, cache, configuration);        
+    }
+
+    [HttpGet]
+    public async Task<IActionResult> Get()
+    {
+        return Ok(await _customerService.GetAllCustomers());
+    }
+
+    // GET api/<ValuesController>/5
+    [HttpGet("{id}")]
+    public async Task<IActionResult> Get(Guid id)
+    {
+        return Ok(await _customerService.GetCustomerDto(new CustomerDto() { Id = id }));
+    }
+
+    // POST api/<ValuesController>
+    [HttpPost]
+    public async Task<IActionResult> Post([FromBody] CustomerDto customer)
+    {
+        return Ok(await _customerService.RegisterCustomer(customer));
+    }
+
+    // PUT api/<ValuesController>/5
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Put([FromBody] CustomerDto value)
+    {
+        await _customerService.EditCustomer(value);
+        return Ok("Edited");
+    }
+
+    // DELETE api/<ValuesController>/5
+    [HttpDelete("{id}")]
+    public async Task<IActionResult> Delete(Guid id)
+    {
+        await _customerService.DeleteCustomer(new CustomerDto() { Id = id });
+        return Ok("Deleted");
+    }
 }
 
-app.UseHttpsRedirection();
+````
 
-app.UseAuthorization();
+Por ultimo vamos criar um projeto console em .net 7 e implementar a parte de ouvir o canal e sempre que alguém colocar alguma coisa nele, nosso projeto reproduzir a informação e manipular como bem entender
+   
+Program.cs   
+````C#
 
-app.MapControllers();
+using StackExchange.Redis;
 
-app.Run();
+string RedisConnectionString = "localhost:6379";
 
+ConnectionMultiplexer connection = ConnectionMultiplexer.Connect(RedisConnectionString);
 
-```
+string Channel = "customer-redis";
 
+Console.WriteLine("Ouvindo o canal");
 
+connection.GetSubscriber().Subscribe(Channel, (channel, message) => Console.WriteLine("Usuario recebido no canal mensagem: " + message));
+
+Console.ReadLine();
+
+````
+   
+   
 ### <h5> [IDE Utilizada]</h5>
 ![VisualStudio](https://img.shields.io/badge/Visual_Studio_2019-000000?style=for-the-badge&logo=visual%20studio&logoColor=purple)
 
