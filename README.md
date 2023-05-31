@@ -14,7 +14,7 @@ Projeto com finalidade em mostrar a implementação do Redis, uma ferramenta mui
   
 
 
-<img align="right" src="https://methodpoet.com/wp-content/uploads/2022/06/mediator-pattern-solution.png" width="300" height="300"/>
+<img align="right" src="https://redis.com/wp-content/uploads/2023/04/mkt-13879-caching-framework-diagrams-RI-CDC-01.png" width="500" height="400"/>
 
 
 </br></br>
