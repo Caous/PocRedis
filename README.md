@@ -44,6 +44,26 @@ Legal né? Mas agora a pergunta é como posso usar o Redis? Abaixo dou um exempl
 ### <h2>[Cenário de Uso]
 Vamos imaginar o seguinte cenário, você tem uma API Rest <b>que gerencia seu cliente</b>, desta forma, você precisa fazer várias alterações com seu cliente, como <b>alterar, cadastrar, excluir, listar, filtrar etc...</b> Então vamos essa API precisa notificar outro sistema sempre que cadastrar um usuário novo, sendo assim oque você vai precisar fazer é sua API notificar o Canal que ela está inscrita e o aplicação do outro lado receber a notificação.
 
+   
+## <h2> Primeiro passo vamos colocar o Redis em um container
+   
+   Execute o comando abaixo no seu promt de comando
+   
+   ````
+   docker run --name local-redis -p 6379:6379 -d redis
+   ````
+   
+   Agora execute o redis e abra sua interface para criarmos um canal
+   ````
+   docker exec -it local-redis redis-cli
+   ````
+   
+   Para criar uma chave com um valor:
+   
+   ````
+   127.0.0.1:6379> SET “chanel-test” “Welcome to redis”
+   ````
+   
 ### <h2> Criação de Classes
 
 Vamos criar a classe que será responsável por conectar ao canal e configurar o cache.
