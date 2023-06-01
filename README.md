@@ -1,13 +1,13 @@
 # Redis
 
-Projeto com finalidade em mostrar a implementação do Redis, uma ferramenta muito utilizada para cache mas também com outros recursos escondidos.
+Projeto com finalidade em mostrar a implementação do Redis, uma ferramenta muito utilizada para cache mas também com outros recursos que você não sabia.
 
-![MediatR](https://user-images.githubusercontent.com/38294660/236552188-58a48d2d-5927-4b41-b0dc-942495a443a6.png)
+![MediatR](https://linuxiac.b-cdn.net/wp-content/uploads/2021/06/redis-how-it-works.png)
 
 
 
 ### <h2>Fala Dev, seja muito bem-vindo
-   Está POC é para mostrar como podemos implementar o <b>Redis</b> em diversos projetos, com adaptação para o cenário que você precisa, juntamente mostrando outro serviços dentro do próprio Redis, também te explico <b>o que é o Redis</b> e como usar em diversas situações. Espero que encontre o que procura. <img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"> 
+   Está POC é para mostrar como podemos implementar o <b>Redis</b> em diversos projetos, com adaptação para o cenário que você precisa, juntamente mostrando outro serviço dentro do próprio Redis, também te explico <b>o que é o Redis</b> e como usar em diversas situações. Espero que encontre o que procura. <img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"> 
 </em></p></h5>
   
   </br>
@@ -21,11 +21,11 @@ Projeto com finalidade em mostrar a implementação do Redis, uma ferramenta mui
 
 ### <h2>Redis <a href="https://redis.io/docs/" target="_blank"><img alt="Redis" src="https://img.shields.io/badge/Redis-blue?style=flat&logo=google-chrome"></a>
 
- <a href="https://redis.io/" target="_blank">Redis </a> O armazenamento de dados em memória de código aberto usado por milhões de desenvolvedores como banco de dados, cache, mecanismo de streaming e Menssage Broker. Redis é uma ótima alternativa para trabalhar com cache hoje uma das ferramentas mais queridas do mercado, utilizada para fazer cache distribuido principalmente para aplicações com grande escalonamento por exemplo Micro Serviço.
+ <a href="https://redis.io/" target="_blank">Redis </a> O armazenamento de dados em memória de código aberto usado por milhões de desenvolvedores, cache, mecanismo de streaming e Menssage Broker. Redis é uma ótima alternativa para diversos projetos, trabalhar com cache é uma necessidade de diversos sistemas e hoje uma das ferramentas mais queridas do mercado, utilizada para fazer cache distribuido principalmente para aplicações com grande escalonamento por exemplo Micro Serviço é o Redis que está rodando para manipular este Cache.
  
-<b>Objetivo Redis:</b> Uma ferramenta Open Source, ou seja, uma ferramenta de código-fonte aberto, para ajudar aplicações e também desenvolvedores a conseguirem melhorar seus códigos com os serviços disponíveis, popularmente conhecido como uma ferramenta de cache em memória, com diversos recursos para salvar dados temporariamente e muito mais rápido do cache armazenado em disco, o Redis também contem alguns serviços inclusos que algumas pessoas desconhecem, sendo muito útil para outras funções como: Menssage Broke, Submit/Publish, Transactions dentre outros. Desta forma o Redis é uma ferramenta com diversos recursos a serem explorados para cada desafio.
+<b>Objetivo:</b> Uma ferramenta Open Source, ou seja, uma ferramenta de código-fonte aberto, para ajudar aplicações e também desenvolvedores a conseguirem melhorar seus códigos com os serviços disponíveis, popularmente conhecido como uma ferramenta de <b>cache em memória</b>, com diversos recursos para salvar dados temporariamente e muito mais rápido do cache armazenado em disco, o Redis também contem alguns serviços inclusos que algumas pessoas desconhecem, sendo muito útil para outras funções como ser um <b>Menssage Broke, Submit/Publish, Transactions dentre outros</b>. Desta forma o Redis é uma ferramenta com diversos recursos a serem explorados para cada desafio.
    
-Vamos pontuar apenas dois tópicos dos serviços que o Redis oferece, Pub/Sub e Cache. Vamos focar no objetivo de cada um, com sua vantagem e desvantagem.
+   Vamos <b>pontuar apenas dois tópicos dos serviços que o Redis oferece, Pub/Sub e Cache</b>. Vamos focar no objetivo de cada um, com sua vantagem e desvantagem.
   
   
    <b>[Cache]</b> Redis consegue armanezar os dados em memória possibilitando que você consiga ter acesso as informações de forma mais rápida direta, por sua estrutura ser cache distribuídos outras aplicações podem acessar a mesma informação, sendo possível e muito utilizado hoje em dia em aplicações que estão em containers com docker e kubernets, também dependendo da sua utilização é possível tirar snapshots para armazenar os dados em disco. Este tipo de cache pode melhorar a performance da aplicação, além de facilitar a sua escalabilidade. Quando se trabalha com cache distribuído, o dado:
