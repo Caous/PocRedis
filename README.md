@@ -28,14 +28,14 @@ Projeto com finalidade em mostrar a implementação do Redis, uma ferramenta mui
    Vamos <b>pontuar apenas dois tópicos dos serviços que o Redis oferece, Pub/Sub e Cache</b>. Vamos focar no objetivo de cada um, com sua vantagem e desvantagem.
   
   
-   <b>[Cache]</b> Redis consegue armanezar os dados em memória possibilitando que você consiga ter acesso as informações de forma mais rápida direta, por sua estrutura ser cache distribuídos outras aplicações podem acessar a mesma informação, sendo possível e muito utilizado hoje em dia em aplicações que estão em containers com docker e kubernets, também dependendo da sua utilização é possível tirar snapshots para armazenar os dados em disco. Este tipo de cache pode melhorar a performance da aplicação, além de facilitar a sua escalabilidade. Quando se trabalha com cache distribuído, o dado:
+   <b>[Cache]</b> <b>Redis consegue armanezar os dados em memória possibilitando que você consiga ter acesso as informações de forma mais rápida<b/>, por sua estrutura ser <b>cache distribuídos</b> outras aplicações podem acessar a mesma informação, sendo possível e muito utilizado hoje em dia em <b>aplicações que estão em containers com docker e kubernets</b>, também dependendo da sua utilização é possível tirar <b>snapshots para armazenar os dados em disco</b>. Este tipo de cache pode melhorar a performance da aplicação, além de facilitar a sua escalabilidade. Quando se trabalha com cache distribuído, o dado:
 
  - É coerente (consistente) entre as requisições pelos vários servidores da aplicação;
  - Não se perde se a aplicação reiniciar;
- - Não utiliza a memória local.
+ - Memorial local é configurável.
   
    
-<b>[Pub/Sub]</b> SUBSCRIBE, UNSUBSCRIBEe PUBLISH este é um padrão de projeto arquitetural para mensagens Publicar/Assinar onde remetentes não são programados para enviar suas mensagens para receptores específicos (assinantes). Em vez disso, as mensagens publicadas são caracterizadas em canais (Chanel), sem conhecimento de quais (se houver) assinantes podem existir. Os assinantes manifestam interesse em um ou mais canais e só recebem mensagens de seu interesse, sem saber quais (se houver) editores existem.      
+<b>[Pub/Sub]</b> SUBSCRIBE, UNSUBSCRIBE e PUBLISH este é um padrão de projeto arquitetural para mensagens Publicar/Assinar onde remetentes não são programados para enviar suas mensagens para receptores específicos (assinantes). Em vez disso, as mensagens publicadas são caracterizadas em canais (Chanel), sem conhecimento de quais (se houver) assinantes podem existir. Os assinantes manifestam interesse em um ou mais canais e só recebem mensagens de seu interesse, sem saber quais (se houver) editores existem. Este padrão é muito usado e simples para comunicações, mas deve-se atender alguns pontos, se a biblioteca que estiver usando não for configuravel, você pode perder suas mensagens depois de um certo tempo, além disso não existe uma fila.
    
 Legal né? Mas agora a pergunta é como posso usar o Redis? Abaixo dou um exemplo de caso de uso.
 
