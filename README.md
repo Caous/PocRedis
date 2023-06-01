@@ -61,8 +61,28 @@ Vamos imaginar o seguinte cenário, você tem uma API Rest <b>que gerencia seu c
    Para criar uma chave com um valor:
    
    ````
-   127.0.0.1:6379> SET “chanel-test” “Welcome to redis”
+   127.0.0.1:6379> SET “customer-redis" “Welcome to redis”
    ````
+   
+   ### <h2> Criando nosso appsetings.json
+   
+   ```Json
+   {
+      "Logging": {
+         "LogLevel": {
+         "Default": "Information",
+         "Microsoft.AspNetCore": "Warning"
+         }
+      },
+  "AllowedHosts": "*",
+  "Redis": {
+    "ConnectionString": "localhost:6379",
+    "Chanel": "customer-redis"
+      }
+   }
+
+   ```
+   
    
 ### <h2> Criação de Classes
 
