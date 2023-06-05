@@ -1,13 +1,13 @@
 # Redis
 
-Projeto com finalidade em mostrar a implementação do Redis, uma ferramenta muito utilizada para cache mas também com outros recursos que você não sabia.
+Projeto com objetivo em mostrar a implementação do Redis, uma ferramenta muito utilizada para cache mas também com outros recursos que você não sabia.
 
 ![MediatR](https://linuxiac.b-cdn.net/wp-content/uploads/2021/06/redis-how-it-works.png)
 
 
 
 ### <h2>Fala Dev, seja muito bem-vindo
-   Está POC é para mostrar como podemos implementar o <b>Redis</b> em diversos projetos, com adaptação para o cenário que você precisa, juntamente mostrando outro serviço dentro do próprio Redis, também te explico <b>o que é o Redis</b> e como usar em diversas situações. Espero que encontre o que procura. <img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"> 
+   Está POC é para mostrar como podemos implementar o <b>Redis</b> em diversos projetos, com adaptação para o cenário que você precisa, juntamente mostrando outros serviços dentro do próprio Redis, também te explico <b>o que é o Redis</b> e como usar em diversas situações. Espero que encontre o que procura. <img src="https://media.giphy.com/media/WUlplcMpOCEmTGBtBW/giphy.gif" width="30"> 
 </em></p></h5>
   
   </br>
@@ -21,28 +21,34 @@ Projeto com finalidade em mostrar a implementação do Redis, uma ferramenta mui
 
 ### <h2>Redis <a href="https://redis.io/docs/" target="_blank"><img alt="Redis" src="https://img.shields.io/badge/Redis-blue?style=flat&logo=google-chrome"></a>
 
- <a href="https://redis.io/" target="_blank">Redis </a> O armazenamento de dados em memória de código aberto usado por milhões de desenvolvedores, cache, mecanismo de streaming e Menssage Broker. Redis é uma ótima alternativa para diversos projetos, trabalhar com cache é uma necessidade de diversos sistemas e hoje uma das ferramentas mais queridas do mercado, utilizada para fazer cache distribuido principalmente para aplicações com grande escalonamento por exemplo Micro Serviço é o Redis que está rodando para manipular este Cache.
+ <a href="https://redis.io/" target="_blank">Redis </a> armazenamento de dados em memória, de código aberto usado por milhões de desenvolvedores, cache, mecanismo de streaming, Menssage Broker e muito mais. Redis é uma ótima alternativa para diversos projetos, trabalhar com cache é uma necessidade de diversos sistemas e hoje uma das ferramentas mais queridas do mercado, utilizada para fazer cache distribuido principalmente para aplicações com grande escalonamento por exemplo Micro Serviço, o <b>redis normalmente é usado para manipular o Cache nesse tipo de sistema</b>.
  
-<b>Objetivo:</b> Uma ferramenta Open Source, ou seja, uma ferramenta de código-fonte aberto, para ajudar aplicações e também desenvolvedores a conseguirem melhorar seus códigos com os serviços disponíveis, popularmente conhecido como uma ferramenta de <b>cache em memória</b>, com diversos recursos para salvar dados temporariamente e muito mais rápido do cache armazenado em disco, o Redis também contem alguns serviços inclusos que algumas pessoas desconhecem, sendo muito útil para outras funções como ser um <b>Menssage Broke, Submit/Publish, Transactions dentre outros</b>. Desta forma o Redis é uma ferramenta com diversos recursos a serem explorados para cada desafio.
+<b>Objetivo:</b> uma ferramenta Open Source, ou seja, uma ferramenta de código-fonte aberto, popularmente conhecido como uma ferramenta de <b>cache em memória</b>, com diversos recursos para salvar dados temporariamente, ele se destaca por manter seus dados de cache armazenados em momória, diferente de muitos outros que é no disco rígido, o Redis também contem alguns serviços inclusos que algumas pessoas desconhecem, sendo muito útil para outras funções como:
+   <br>
+   <b>Menssage Broke</b><br>
+   <b>Submit/Publish</b><br>
+   <b>Transactions</b>.
    
    Vamos <b>pontuar apenas dois tópicos dos serviços que o Redis oferece, Pub/Sub e Cache</b>. Vamos focar no objetivo de cada um, com sua vantagem e desvantagem.
   
   
-   <b>[Cache]</b> <b>Redis consegue armanezar os dados em memória possibilitando que você consiga ter acesso as informações de forma mais rápida<b/>, por sua estrutura ser <b>cache distribuídos</b> outras aplicações podem acessar a mesma informação, sendo possível e muito utilizado hoje em dia em <b>aplicações que estão em containers com docker e kubernets</b>, também dependendo da sua utilização é possível tirar <b>snapshots para armazenar os dados em disco</b>. Este tipo de cache pode melhorar a performance da aplicação, além de facilitar a sua escalabilidade. Quando se trabalha com cache distribuído, o dado:
+   <b>[Cache]</b> Redis consegue armanezar os dados em memória possibilitando que você consiga ter acesso as informações de forma mais rápida, por sua estrutura ser <b>cache distribuídos</b> outras aplicações podem acessar a mesma informação, muito utilizado hoje em dia em <b>aplicações que estão em containers com docker e kubernets</b>, onde temos diversas instâncias virtuais daquele servidor, também dependendo da sua utilização é possível tirar <b>snapshots para armazenar os dados em disco</b>. Este tipo de cache pode melhorar a performance da aplicação, além de facilitar a sua escalabilidade. Quando se trabalha com cache distribuído, o dado:
 
  - É coerente (consistente) entre as requisições pelos vários servidores da aplicação;
  - Não se perde se a aplicação reiniciar;
  - Memorial local é configurável.
+ - Velocidade de resposta
+ - Configurações que permitem você deixar o cachê dinâmico para armezar (Tempo de armazenamento, snapshots, objetos duplicados...)
   
    
-<b>[Pub/Sub]</b> SUBSCRIBE, UNSUBSCRIBE e PUBLISH este é um padrão de projeto arquitetural para mensagens Publicar/Assinar onde remetentes não são programados para enviar suas mensagens para receptores específicos (assinantes). Em vez disso, as mensagens publicadas são caracterizadas em canais (Chanel), sem conhecimento de quais (se houver) assinantes podem existir. Os assinantes manifestam interesse em um ou mais canais e só recebem mensagens de seu interesse, sem saber quais (se houver) editores existem. Este padrão é muito usado e simples para comunicações, mas deve-se atender alguns pontos, se a biblioteca que estiver usando não for configuravel, você pode perder suas mensagens depois de um certo tempo, além disso não existe uma fila.
+<b>[Pub/Sub]</b> SUBSCRIBE, UNSUBSCRIBE e PUBLISH este é um padrão de projeto arquitetural para mensagens Publicar/Assinar onde remetentes não são programados para enviar suas mensagens para receptores específicos (assinantes). Ou seja quem publica a mensagem não quer saber quem vai consumir, ele apenas deixa em um local disponível, caracterizados em canais (Chanel), sem conhecimento de quais assinantes podem existir. Os assinantes manifestam interesse em um ou mais canais e só recebem mensagens de seu interesse, sem saber quais (se houver) editores existem. Este padrão é muito usado e simples para comunicações, mas deve-se atentar alguns pontos, se a biblioteca que estiver usando não for configuravel, você pode perder suas mensagens depois de um certo tempo, além disso não existe uma fila esses pontos podem ser classificados como negativos se sua aplicação está preparada para trabalhar com fila.
    
 Legal né? Mas agora a pergunta é como posso usar o Redis? Abaixo dou um exemplo de caso de uso.
 
 </br></br>
 
 ### <h2>[Cenário de Uso]
-Vamos imaginar o seguinte cenário, você tem uma API Rest <b>que gerencia seu cliente</b>, desta forma, você precisa fazer várias alterações com seu cliente, como <b>alterar, cadastrar, excluir, listar, filtrar etc...</b> Então vamos essa API precisa notificar outro sistema sempre que cadastrar um usuário novo, sendo assim oque você vai precisar fazer é sua API notificar o Canal que ela está inscrita e o aplicação do outro lado receber a notificação.
+Vamos imaginar o seguinte cenário, você tem uma API Rest <b>que gerencia seu cliente</b>, desta forma, você precisa fazer várias manipulações com seu cliente, como <b>alterar, cadastrar, excluir, listar, filtrar etc...</b> Alem deste fator de manipular o cliente, vamos precisar precisa que nossa API notifique outro sistema sempre que cadastrar um usuário novo, sendo assim oque você vai precisar fazer é sua API notificar o Canal que ela está inscrita e o aplicação do outro lado receber a notificação.
 
    
 ## <h2> Primeiro passo vamos colocar o Redis em um container
